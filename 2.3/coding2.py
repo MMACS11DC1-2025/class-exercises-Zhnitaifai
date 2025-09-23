@@ -14,3 +14,12 @@ Judge 4: 8.5
 Judge 5: 9
 Your Olympic score is 8.0
 """
+
+print(f"Your Olympic score is {(float(input("Judge 1: "))+float(input("Judge 2: "))+float(input("Judge 3: "))+float(input("Judge 4: "))+float(input("Judge 5: ")))/5}")
+
+# total = 0
+
+# for i in range(5):
+#     total += int(input(f"Judge {i+1}:"))
+
+# print(f"Your Olympic score is {total/5}")
