@@ -15,73 +15,68 @@ You must design your algorithm in English first, then translate it to Python cod
 Test as you go! Describe in your comments what steps you took to test your code.
 """
 
-# test your own similarities
-# give suggestion from fav fast food (including people to go with and dish)
-# find personal suggestions for specific person
+import random
 
-# init stuf
+# Initialize responses.csv
 file = open("2.4/responses.csv")
 file.readline()
+
+# adds all responses.csv file data to list
 fatData = []
 for line in file:
     fatData.append(line.split(","))
 
-userLine = 0
+print("Hi. I am your personal social interaction planner!")
 
-while userLine == 0:
-    user = input("Enter your full name: ")
-    # check for user, get user line num
-    for lines in range(len(fatData)):
-        if fatData[lines][1] == user.strip():
-            userLine = lines
+# makes it easier to repeat string lowering and stripping
+def stringClean(string):
+    return str(string).lower().strip("!?., ")
 
+# returns the list index depending on the name input
+def getUserLine(name):
+    userLn = 0
 
-# similarThingsNameIndex = []
-# similarThings = []
+    # checks each line in fatData to see if name matchs with data in FatData
+    while userLn == 0:
+        for lines in range(len(fatData)):
+            if stringClean(fatData[lines][1]) == stringClean(name):
+                userLn = lines
+    return userLn
 
-# for person in range(len(fatData)):
-#     for i in range(len(fatData[person])):
-#         if fatData[userLine][i] == fatData[person][i]:
-#             similarThingsNameIndex.append(person)
-#             similarThings.append(fatData[person][i])
+# checks if entered name is a valid name
+index = 0
+while True:
+    user = input("Enter a valid name: ")
 
-# print(similarThingsNameIndex)
-# print(similarThings)
+    # splits name for single name validation
+    subName = user.split()
 
-# num = len(similarThingsNameIndex)-(len(similarThingsNameIndex)-10)
-# for each in range(num):
-#     del similarThingsNameIndex[len(similarThingsNameIndex)-1]
-#     del similarThings[len(similarThings)-1]
-
-# print(similarThingsNameIndex)
-
-# numOfSimilarAccumalative = 0
-# for each in range(len(similarThingsNameIndex)):
-#     repeats = {}
-
-#     for i in similarThings:
-#         if i in repeats:
-#             repeats[i] += 1
-#         else:
-#             repeats[i] = 1
+    # checks in fatData for single name
+    if subName[index] in fatData[getUserLine(user)][1]:
+        print("Name has been scanned and validated")
+        break
     
-#     # get similar person
-#     similarPerson = fatData[similarThingsNameIndex[int(each)]][1]
-#     print(f"You have {repeats[int(each)]} similarities with {similarPerson}")
+    # prints error message
+    print("Name not found. Please enter a valid name.")
+    index += 1
 
-similaritiesSentences = []
+# initalizes similarPeople list
 similarPeople = []
 
+# looks through fatData for similarities between each line and user
 for person in range(len(fatData)):
-    if person == userLine:
+    # prevents self comparison
+    if person == getUserLine(user):
         continue
 
     similar = 0
 
+    # checks if similar
     for item in range(len(fatData[person])):
-        if fatData[person][item] == fatData[userLine][item]:
+        if fatData[person][item] == fatData[getUserLine(user)][item]:
             similar += 1
 
+    # if no similarities, skips iteration
     if similar == 0:
         continue
     else:
@@ -89,11 +84,19 @@ for person in range(len(fatData)):
 
     print(f"You have {similar} similarities with {fatData[person][1]}")
 
-#recommended activity part
-"""
-    - get name to be recommendec w/ from list of similar
-"""
+# follow up question
+personInput = input("Choose a person for a social interaction reccomendation from the similar people above: ").strip("!?,. ")
 
-# personInput = input("Choose a person for a social interaction reccomendation from the similar people above: ").lower().strip("!?,. ")
+# checking with 
+if personInput in similarPeople:
 
-# if personInput in 
+    selectedPerson = []
+
+    for item in range(len(fatData[getUserLine(personInput)])):
+        if fatData[getUserLine(personInput)][item] == fatData[getUserLine(user)][item]:
+            selectedPerson.append(fatData[getUserLine(personInput)][item])
+
+    print(selectedPerson)
+
+    activity = random.choice(selectedPerson)
+    print(f"I reccomend trying {activity} with {personInput}")
