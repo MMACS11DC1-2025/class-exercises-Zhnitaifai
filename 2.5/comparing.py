@@ -16,6 +16,7 @@ Test as you go! Describe in your comments what steps you took to test your code.
 """
 
 import random
+import time
 
 # Initialize responses.csv
 file = open("2.4/responses.csv")
@@ -34,31 +35,55 @@ def stringClean(string):
 
 # returns the list index depending on the name input
 def getUserLine(name):
-    userLn = 0
+    # splits name into parts to check only first or last name
+    subName = str(name).split()
 
-    # checks each line in fatData to see if name matchs with data in FatData
-    while userLn == 0:
-        for lines in range(len(fatData)):
-            if stringClean(fatData[lines][1]) == stringClean(name):
-                userLn = lines
-    return userLn
+    # checks for every item in subName if it is in fatData
+    for userLines in range(len(fatData)):
+        for part in subName:
+            if stringClean(part) in stringClean(fatData[userLines][1]):
+                return userLines
+    return -1
+
+personInput = ""
 
 # checks if entered name is a valid name
-index = 0
-while True:
-    user = input("Enter a valid name: ")
+def checkUsername():
+    while True:
+        user = input("Enter a valid name: ")
+        # splits name for single name validation
+        subName = user.split()
+        # gets line number in fatData of the chosen person to improve readability
+        userLine = getUserLine(user)
 
-    # splits name for single name validation
-    subName = user.split()
+        # follows up on no name found, restarts input cycle
+        if userLine == -1:
+            print("Name not found. Please enter a valid name.")
+            continue
 
-    # checks in fatData for single name
-    if subName[index] in fatData[getUserLine(user)][1]:
-        print("Name has been scanned and validated")
-        break
-    
-    # prints error message
-    print("Name not found. Please enter a valid name.")
-    index += 1
+        # checks in fatData if any part of the name matches
+        found = False
+        for part in subName:
+            if stringClean(part) in stringClean(fatData[userLine][1]):
+                found = True
+                break
+        
+        # outside main for loop in order to break out of while loop
+        if found:
+            print("Name found!")
+            global personInput
+            personInput = fatData[userLine][1]
+            break
+        else:
+            # prints error message
+            print("Name not found. Please enter a valid name.")
+
+checkUsername()
+# user variable is used as record user's name for later use; personInput unusable as changed with every checkUsername() call
+user = personInput
+
+# pause to read message
+time.sleep(1)
 
 # initalizes similarPeople list
 similarPeople = []
@@ -84,19 +109,84 @@ for person in range(len(fatData)):
 
     print(f"You have {similar} similarities with {fatData[person][1]}")
 
-# follow up question
-personInput = input("Choose a person for a social interaction reccomendation from the similar people above: ").strip("!?,. ")
+    # pauses to mimic slower computation, more human
+    time.sleep(0.25)
+
+# Follow up recommendation question
+# personInput = input("Choose a person for a social interaction reccomendation from the similar people above").strip("!?,. ")
+print("Choose a person for a social interaction reccomendation from the similar people above")
+
+# reuses login code but to make sure selected similar person exists
+checkUsername()
 
 # checking with 
-if personInput in similarPeople:
+while True:
+    if personInput in similarPeople:
+        # selected person's similarities
+        selectedPerson = []
 
-    selectedPerson = []
+        # adds user's similarities with selected person to selectedPerson list
+        for item in range(len(fatData[getUserLine(personInput)])):
+            if fatData[getUserLine(personInput)][item] == fatData[getUserLine(user)][item]:
+                selectedPerson.append(fatData[getUserLine(personInput)][item])
 
-    for item in range(len(fatData[getUserLine(personInput)])):
-        if fatData[getUserLine(personInput)][item] == fatData[getUserLine(user)][item]:
-            selectedPerson.append(fatData[getUserLine(personInput)][item])
+        # chooses random activity to do from simliarities
+        activity = random.choice(selectedPerson)
 
-    print(selectedPerson)
+        # prints recommendation
+        print(f"I recommend trying {activity} with {personInput}")
+        print("Have fun with your new found social interaction!")
+        break
+    else:
+        # if no similarities, asks to pick another person (not a good fit)
+        print(f"No data found on {personInput}. Please enter another name")
 
-    activity = random.choice(selectedPerson)
-    print(f"I reccomend trying {activity} with {personInput}")
+''' ~~~~~~~~~~~~~~~~~~~~~~~~~~~ Test Cases ~~~~~~~~~~~~~~~~~~~~~~~~~~
+Case 1:
+    User Input: "brendan" or "BRENDAN" or "yap" or "YAP" or "brendan yap" or "BRENDAN YAP" (*any name spelling correctly)
+    Returns:
+        Name found!
+        You have 1 similarities with Ethan Wong
+        You have 1 similarities with Leland Lei
+        You have 3 similarities with Derick Su
+        You have 2 similarities with Jayden Wong
+        You have 4 similarities with Mason Lui
+        You have 3 similarities with Gabe Armour
+        You have 2 similarities with Evan Chan
+        You have 2 similarities with Steven Zhang
+        You have 2 similarities with Tejas Verma
+        You have 2 similarities with Salomi Aiyathurai
+        You have 2 similarities with Jeremy Wong
+        You have 1 similarities with Aaryan Gogna
+        You have 1 similarities with Karson Lum
+        You have 2 similarities with Jacob Joe
+        You have 1 similarities with Barak Sun
+        You have 2 similarities with Nguyen Doan
+        You have 5 similarities with Serene Lee
+        You have 4 similarities with Greysen Li
+        You have 3 similarities with Bella Gu
+        You have 3 similarities with Daichi Lee
+        You have 2 similarities with Theo Shim
+        You have 1 similarities with Alessandra Ysabelle Guzman
+    
+    User Input: e.g. "nguyen" or "NGUYEN" or "doan" or "DOAN" or "nguyen doan" or "NGUYEN DOAN" (*any name spelling correctly)
+    Returns:
+        Name found!
+        I recommend trying Badminton with Nguyen Doan
+        Have fun with your new found social interaction!
+
+        or
+
+        Name found!
+        I recommend trying Science with Nguyen Doan
+        Have fun with your new found social interaction!
+
+Case 2:
+    User Input: "brneden" (any mispelled names)
+    Returns:
+        Name not found. Please enter a valid name.
+        Enter a valid name:
+
+    *will loop until given properly spelled name
+    *same with second input
+'''
