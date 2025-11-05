@@ -6,7 +6,7 @@
 
 import turtle
 import time
-
+turtle.speed(0.00000001)
 recursions = int(input("Recursions: "))
 
 def draw_tree(level, branch_length):
@@ -62,3 +62,5 @@ turtle.shape("triangle")
 draw_tree(recursions, 200)
 
 time.sleep(25)
+
+turtle.done()
