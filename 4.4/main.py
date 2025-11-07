@@ -3,21 +3,42 @@ import turtle
 # Turtle settings to speed up animation
 turtle.speed(0)
 turtle.delay(0)
+
+# Turns off automatic updates => does not show drawing animation
 turtle.tracer(0)
 
-levels = int(input("Enter the number of levels (anything above 3 is laggy): "))
-rad = int(input("Enter a radius (100 to 350): "))
-arrayNum = int(input("Enter the number circles per a level (3 to 8): "))
-variability = int(input("Enter the variabillity between the levels (between 2-3): "))
-acceleration = input("Would you like acceleration? ")
-if acceleration.lower() == "y":
-    acceleration == True
+# checks 1st digit of input is "y" or "n" for yes or no respectively
+def validInput(input):
+    if str(input[0]).lower() == "y":
+        return True
+    elif str(input[0]).lower() == "n":
+        return False
+    else:
+        print("Please enter a valid input")
+        return ""
 
+# drawing settings' inputs
+levelsInput = int(input("Enter the number of levels (anything above 3 is laggy): "))
+radInput = int(input("Enter a radius (100 to 350): "))
+arrayNumInput = int(input("Enter the number circles per a level (3 to 8): "))
+variabilityInput = int(input("Enter the variabillity between the levels (between 2-3): "))
+
+# checks if input is valid, exits loops if valid
+while True:
+    # user input
+    acceleration = input("Would you like acceleration? (y/n)")
+
+    # calls validInput to check
+    acceleration = validInput(acceleration)
+    if acceleration == True or acceleration == False:
+        break
+
+# adds drawing settings to dictionary
 settings = {
-    "levels": levels,
-    "radius": rad,
-    "arrayNum": arrayNum, 
-    "variability":variability, 
+    "levels": levelsInput,
+    "radius": radInput,
+    "arrayNum": arrayNumInput, 
+    "variability": variabilityInput, 
     "angleIncrement": 10
 }
 
@@ -25,9 +46,9 @@ settings = {
 colours = {
     0:"red", 
     1:"orange", 
-    2:"yellow", 
-    3:"green", 
-    4:"blue", 
+    2:"yellow",
+    3:"blue",
+    4:"green",
     5:"indigo", 
     6:"violet", 
     7:"black"}
@@ -51,22 +72,41 @@ def centreCircle(rad):
     turtle.right(90)
 
 # main 
-def virus(level, rad, angleModifier):
+def molecule(level, rad, angleModifier):
+    # used for rotation animation
     turtle.right(angleModifier)
+
     centreCircle(rad)
+
     if level > 1:
-        for i in range(settings[arrayNum]):
-            turtle.left((360/settings[arrayNum]))
+        # draws the number of cicles per level
+        for i in range(settings["arrayNum"]):
+            # goes to edge of previous level's circle
+            turtle.left((360/settings["arrayNum"]))
             turtle.forward(rad)
+
+            #changes colour base on which circle on the level it is
             turtle.color(colours[i])
-            virus(level-1, rad/settings[variability], angleModifier)
+
+            # branchs out
+            molecule(level-1, rad, angleModifier)
+
+            # return back .
             turtle.left(angleModifier)
             turtle.back(rad)
+
+    # recursiveCounter += 1
+# recursiveCounter = 0
 
 while True:
     # clears screen to draw another frame
     turtle.clear()
-    virus(settings["levels"], settings["radius"], settings["angleIncrement"])
+    molecule(settings["levels"], settings["radius"], settings["angleIncrement"])
     turtle.update()
+
+    # prints 1 line that constantly updated its value
+    # print(f"\r Times function called: {recursiveCounter}", end=" ")
+
+    # if user selects accelaration, increases the increments of angle on the rotation
     if acceleration:
         settings["angleIncrement"] += 1

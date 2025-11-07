@@ -12,9 +12,9 @@ You'll create a fractal generator that can draw at least one recursive pattern (
 
 1. **Recursive Functions**: At least one function that calls itself recursively - done
 2. **Turtle Graphics**: Visual drawing using the turtle module - done
-3. **Dictionary**: Store fractal settings in dictionaries (like the tree seasons in the drawTree example) 
+3. **Dictionary**: Store fractal settings in dictionaries (like the tree seasons in the drawTree example) - done
 4. **Return Values**: Demonstrate understanding of the 'return' statement and recursion by being able to report the total number of recursive calls made
-5. **User Interaction**: Include at least one user input to dynamically generate your graphics
+5. **User Interaction**: Include at least one user input to dynamically generate your graphics- done
 6. **Documentation**: Complete a README.md file with testing and process explanation
 7. **Peer Review**: Peer feedback to improve quality of work
 
@@ -23,26 +23,26 @@ You'll create a fractal generator that can draw at least one recursive pattern (
 ### **ESSENTIAL REQUIREMENTS** (2 points each)
 
 ### **Core Programming Concepts**
-- [ ] At least one recursive function defined with proper parameters (2 pts)
-- [ ] Proper base case implemented to stop recursion (2 pts)
-- [ ] Recursive calls reduce problem size toward base case (2 pts)
-- [ ] Function returns meaningful values (not just drawing) (2 pts)
-- [ ] At least one user input to dynamically generate graphics (2 pts)
+- [ ] At least one recursive function defined with proper parameters (2 pts) - done
+- [ ] Proper base case implemented to stop recursion (2 pts) - done
+- [ ] Recursive calls reduce problem size toward base case (2 pts) - done
+- [ ] Function returns meaningful values (not just drawing) (2 pts) - done
+- [ ] At least one user input to dynamically generate graphics (2 pts) - done
 - [ ] Program prints the total count of recursive function calls executed (2 pts)
 
 ### **Data Structures & Organization**
-- [ ] Use a dictionary to store fractal settings (2 pts)
-- [ ] Dictionary keys clearly named and organized (2 pts)
-- [ ] Values include configuration, colors, or descriptions (2 pts)
+- [ ] Use a dictionary to store fractal settings (2 pts) - done
+- [ ] Dictionary keys clearly named and organized (2 pts) - done
+- [ ] Values include configuration, colors, or descriptions (2 pts) - done
 
 ### **Turtle Graphics Integration**
-- [ ] Proper turtle setup and configuration (2 pts)
-- [ ] Function actually draws visual patterns using turtle commands (2 pts)
-- [ ] Visual output demonstrates recursive concepts effectively (2 pts)
+- [ ] Proper turtle setup and configuration (2 pts) - done
+- [ ] Function actually draws visual patterns using turtle commands (2 pts) - done
+- [ ] Visual output demonstrates recursive concepts effectively (2 pts) - done
 
 ### **Code Quality**
-- [ ] Code is well-organized, readable, and follows Python naming conventions. (2 pts)
-- [ ] Includes meaningful comments that explain the logic and steps taken in the code. (2 pts)
+- [ ] Code is well-organized, readable, and follows Python naming conventions. (2 pts) - done
+- [ ] Includes meaningful comments that explain the logic and steps taken in the code. (2 pts) - done
 
 ### **Documentation & Process**
 - [ ] README.md file with project documentation explaining the approach used and how to use the program (2 pts)
@@ -51,7 +51,7 @@ You'll create a fractal generator that can draw at least one recursive pattern (
 - [ ] Screenshots of visual outputs for each test case (2 pts)
 - [ ] Discussion of reasonable recursion depth (for your program, what depth is too low, what is too high, and why?) (2 pts)
 - [ ] Documentation of debugging and testing process in README.md (2 pts)
-- [ ] Source code is committed to repository on Github with **at least 3 meaningful commits on different days** (2 pts)
+- [ ] Source code is committed to repository on Github with **at least 3 meaningful commits on different days** (2 pts) - done
 
 ### **Peer Review**
 - [ ] Peer review completed with classmate. Feedback on code quality, approach, and any debugging techniques used are documented in README (2 pts)
@@ -60,7 +60,7 @@ You'll create a fractal generator that can draw at least one recursive pattern (
 
 ### **Advanced Features**
 - [ ] More complex or creative use of recursion (this may include: multiple base cases, multiple recursive calls, or multiple recursive functions) (1 pt)
-- [ ] Advanced user inputs and error checking (1 pt)
+- [ ] Advanced user inputs and error checking (1 pt) - done
 - [ ] Sophisticated return value usage beyond basic requirement (1 pt)
 
 ### **Creative & Process Elements**
