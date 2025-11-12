@@ -1,4 +1,4 @@
-# Mini-Project: Recursive Fractal Art Generator
+    # Mini-Project: Recursive Fractal Art Generator
 
 ## TOTAL ___ / 52
 
