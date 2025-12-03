@@ -53,7 +53,11 @@ tag16h5 = [
     ]
 ]
 
-def validation(image, referenceTag):
+def trim(image, referenceTag):
     for y in range(referenceTag.height):
         for x in range(referenceTag.width):
+            print("D")
             
+# get top left, see if white, check to see if white spans across whole width (parse through, break loop is black), then check the rows
+# remove specified rows
+# can do this as all borders for april tags are black
