@@ -53,11 +53,37 @@ tag16h5 = [
     ]
 ]
 
-def trim(image, referenceTag):
-    for y in range(referenceTag.height):
-        for x in range(referenceTag.width):
+# def binarize(colour):
+#     if (colour[0] + colour[1] + colour[2])/3 > 
+
+def trim(image):
+    for y in range(image.height):
+        for x in range(image.width):
             print("D")
-            
-# get top left, see if white, check to see if white spans across whole width (parse through, break loop is black), then check the rows
-# remove specified rows
-# can do this as all borders for april tags are black
+
+# # get top left, see if white, check to see if white spans across whole width (parse through, break loop is black), then check the rows
+# # remove specified rows
+# # can do this as all borders for april tags are black
+
+# average out pixels
+
+currentTag = [[]]
+currentPixel = []
+
+# get pixel with constant
+pixelWidth = referenceTag1File.width/6 - referenceTag1File.width%6
+
+# individual april tag pixels
+# combine binarise into this
+currentRow = []
+numInPixel = 0 # to average out pixel
+for pixely in range(referenceTag1File.height):
+    for pixelx in range(referenceTag1File.width):
+        currentRow.append([]) # add column to row
+        r, g, b = referenceTag1[pixelx, pixely] # get pixel colour
+        if ((r+g+b)/3) > 128: # pseduo binarize
+            currentRow.insert(pixelx, 1)
+        else:
+            currentRow.insert(pixelx, 0)
+    currentPixel.append(currentRow)
+    currentRow.clear() 
