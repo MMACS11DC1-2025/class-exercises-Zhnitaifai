@@ -39,8 +39,10 @@ output report with time in 3 decimal placs (well formatted using string formatti
 from PIL import Image
 # tags r 6x6
 
-referenceTag1File = Image.open("referenceTag0.png")
+referenceTag1File = Image.open("6.7/referenceTag0.png")
 referenceTag1 = referenceTag1File.load()
+
+print(referenceTag1File.width)
 
 tag16h5 = [
     [ #ID: 0
@@ -56,10 +58,44 @@ tag16h5 = [
 # def binarize(colour):
 #     if (colour[0] + colour[1] + colour[2])/3 > 
 
-def trim(image):
-    for y in range(image.height):
-        for x in range(image.width):
-            print("D")
+trimTolerance = 20
+
+# get pixel width constant
+pixelWidth = referenceTag1File.width/6 - referenceTag1File.width%6
+
+# def notBlack(pixelx, pixely, direction):
+#     if direction == "right":
+#         r, g, b = referenceTag1[pixelx+1, pixely]
+#     else:
+#         r, g, b = referenceTag1[pixelx, pixely+1]
+        
+#     if ((r+g+b)/3) > (255-trimTolerance):
+#         return True # dark colour
+#     else:
+#         return False # any other lighter colour
+
+# def trim(image):
+#     x = 0
+#     y = 0
+#     while True:
+#         r, g, b = referenceTag1[x, y]
+#         if ((r+g+b)/3) > (255-trimTolerance):
+#             # remove lines
+#             print("hi")
+#         x += 1
+#         y += 1
+
+def trim(image, colourTolerance):
+    pixelDistance = 0
+    while True:
+        r, g, b = referenceTag1[0+pixelDistance, 0+pixelDistance]
+        if r >= colourTolerance and g >= colourTolerance and b >= colourTolerance:
+            pixelDistance += 1
+        else:
+            break
+    left, upper, right, lower = pixelDistance
+    # trim function
+                    
 
 # # get top left, see if white, check to see if white spans across whole width (parse through, break loop is black), then check the rows
 # # remove specified rows
@@ -70,20 +106,24 @@ def trim(image):
 currentTag = [[]]
 currentPixel = []
 
-# get pixel with constant
-pixelWidth = referenceTag1File.width/6 - referenceTag1File.width%6
+print(referenceTag1)
 
 # individual april tag pixels
 # combine binarise into this
+
+'''startScanx = 0
+startScany = 0
+
 currentRow = []
 numInPixel = 0 # to average out pixel
-for pixely in range(referenceTag1File.height):
-    for pixelx in range(referenceTag1File.width):
-        currentRow.append([]) # add column to row
-        r, g, b = referenceTag1[pixelx, pixely] # get pixel colour
-        if ((r+g+b)/3) > 128: # pseduo binarize
-            currentRow.insert(pixelx, 1)
-        else:
-            currentRow.insert(pixelx, 0)
-    currentPixel.append(currentRow)
-    currentRow.clear() 
+for pixels in range(36):
+    for pixely in range(startScanx, startScanx+pixelWidth):
+        for pixelx in range(startScanx, startScanx+pixelWidth):
+            currentRow.append([]) # add column to row
+            r, g, b = referenceTag1[pixelx, pixely] # get pixel colour
+            if ((r+g+b)/3) > 128: # pseduo binarize
+                currentRow.insert(pixelx, 1)
+            else:
+                currentRow.insert(pixelx, 0)
+        currentPixel.append(currentRow)
+        currentRow.clear() '''
