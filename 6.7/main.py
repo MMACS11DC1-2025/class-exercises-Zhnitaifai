@@ -1,20 +1,4 @@
 '''
-determine id's of 3 different apriltags
-using blob extraction (to account for stray pixels)
-test 1st with 1 tag
-sort by id
-get top right to bottom left dark pixels, seperate tags if gap is more that 5 april tag pictures
-'''
-
-'''
-Connected-component labeling
-when occupioed cell encountered, check neighboring cells to see if scanned.
-
-
-get top left, bottom right, unionizing the blacks
-'''
-
-'''
 2 functions: set april tag, detect april tag
 
 1. trim sides until multiple of 6
@@ -53,15 +37,10 @@ tag16h5 = [
      [1, 0, 1, 0, 0, 1],
      [1, 1, 1, 1, 1, 1]
     ]
-]
+] 
 
-# def binarize(colour):
-#     if (colour[0] + colour[1] + colour[2])/3 > 
+trimTolerance = 70
 
-trimTolerance = 20
-
-# get pixel width constant
-pixelWidth = referenceTag1File.width/6 - referenceTag1File.width%6
 
 # def notBlack(pixelx, pixely, direction):
 #     if direction == "right":
@@ -74,56 +53,54 @@ pixelWidth = referenceTag1File.width/6 - referenceTag1File.width%6
 #     else:
 #         return False # any other lighter colour
 
-# def trim(image):
-#     x = 0
-#     y = 0
-#     while True:
-#         r, g, b = referenceTag1[x, y]
-#         if ((r+g+b)/3) > (255-trimTolerance):
-#             # remove lines
-#             print("hi")
-#         x += 1
-#         y += 1
-
-def trim(image, colourTolerance):
+# might want to make so that can pass in custom image
+def trim(colourTolerance):
     pixelDistance = 0
     while True:
-        r, g, b = referenceTag1[0+pixelDistance, 0+pixelDistance]
+        r, g, b, a = referenceTag1[pixelDistance, pixelDistance]
         if r >= colourTolerance and g >= colourTolerance and b >= colourTolerance:
             pixelDistance += 1
         else:
             break
-    left, upper, right, lower = pixelDistance
-    # trim function
+        # x1, y1, x2, x3
+    (left, upper, right, lower) = (pixelDistance, pixelDistance, referenceTag1File.height-pixelDistance, referenceTag1File.width-pixelDistance)
+    croppedTag = referenceTag1File.crop((left, upper, right, lower))
+    # croppedTag.save('croppedTag.png') FOR DEBUGGING
+    # if white border is not equal, check 2 corners
                     
+trim(trimTolerance)
 
-# # get top left, see if white, check to see if white spans across whole width (parse through, break loop is black), then check the rows
-# # remove specified rows
-# # can do this as all borders for april tags are black
+# get pixel width constant
+pixelSize = referenceTag1File.width/6 - referenceTag1File.width%6
 
-# average out pixels
-
-currentTag = [[]]
-currentPixel = []
-
-print(referenceTag1)
+currentTag = [] # the whole tag
+currentPixel = [] # individual sqaure in tag
 
 # individual april tag pixels
 # combine binarise into this
 
-'''startScanx = 0
+startScanx = 0
 startScany = 0
 
 currentRow = []
 numInPixel = 0 # to average out pixel
 for pixels in range(36):
-    for pixely in range(startScanx, startScanx+pixelWidth):
-        for pixelx in range(startScanx, startScanx+pixelWidth):
+    # this block is for individual sqaure
+    for pixely in range(startScany, startScanx+pixelSize):
+        for pixelx in range(startScanx, startScanx+pixelSize):
             currentRow.append([]) # add column to row
             r, g, b = referenceTag1[pixelx, pixely] # get pixel colour
             if ((r+g+b)/3) > 128: # pseduo binarize
                 currentRow.insert(pixelx, 1)
             else:
                 currentRow.insert(pixelx, 0)
-        currentPixel.append(currentRow)
-        currentRow.clear() '''
+        currentPixel.append(currentRow) # adds row to individual sqaure
+        currentRow.clear() # clears row for next interation 
+        startScany += 1
+
+    startScanx += pixelSize
+
+    if pixels+1 % 6 == 0 and pixels != 0:
+        startScany += pixelSize*pixely #jump sqaure in y
+        startScanx = 0
+    
