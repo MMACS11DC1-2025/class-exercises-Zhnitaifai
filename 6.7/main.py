@@ -21,9 +21,10 @@ use selection sort for said list
 output report with time in 3 decimal placs (well formatted using string formatting)
 '''
 from PIL import Image
+import time
 # tags r 6x6
 
-referenceTag1File = Image.open("6.7/referenceTag0.png")
+referenceTag1File = Image.open("6.7/referenceTag1.png")
 referenceTag1 = referenceTag1File.load()
 
 print(referenceTag1File.width)
@@ -39,39 +40,26 @@ tag16h5 = [
     ]
 ] 
 
-trimTolerance = 70
-
-
-# def notBlack(pixelx, pixely, direction):
-#     if direction == "right":
-#         r, g, b = referenceTag1[pixelx+1, pixely]
-#     else:
-#         r, g, b = referenceTag1[pixelx, pixely+1]
-        
-#     if ((r+g+b)/3) > (255-trimTolerance):
-#         return True # dark colour
-#     else:
-#         return False # any other lighter colour
+colourTolerance = 70
 
 # might want to make so that can pass in custom image
-def trim(colourTolerance):
-    pixelDistance = 0
-    while True:
-        r, g, b, a = referenceTag1[pixelDistance, pixelDistance]
-        if r >= colourTolerance and g >= colourTolerance and b >= colourTolerance:
-            pixelDistance += 1
-        else:
-            break
-        # x1, y1, x2, x3
-    (left, upper, right, lower) = (pixelDistance, pixelDistance, referenceTag1File.height-pixelDistance, referenceTag1File.width-pixelDistance)
-    croppedTag = referenceTag1File.crop((left, upper, right, lower))
-    # croppedTag.save('croppedTag.png') FOR DEBUGGING
-    # if white border is not equal, check 2 corners
+pixelDistance = 0
+while True:
+    r, g, b, a = referenceTag1[pixelDistance, pixelDistance]
+    if r >= colourTolerance and g >= colourTolerance and b >= colourTolerance:
+        pixelDistance += 1
+    else:
+        break
+# x1, y1, x2, x3
+(left, upper, right, lower) = (pixelDistance, pixelDistance, referenceTag1File.height-pixelDistance, referenceTag1File.width-pixelDistance)
+croppedTag = referenceTag1File.crop((left, upper, right, lower))
+pixelSize = int(croppedTag.width/6)
+print(croppedTag.width)
+print(pixelSize)
+time.sleep(2)
+croppedTag.save('croppedTag.png')
+# if white border is not equal, check 2 corners
                     
-trim(trimTolerance)
-
-# get pixel width constant
-pixelSize = referenceTag1File.width/6 - referenceTag1File.width%6
 
 currentTag = [] # the whole tag
 currentPixel = [] # individual sqaure in tag
@@ -84,23 +72,49 @@ startScany = 0
 
 currentRow = []
 numInPixel = 0 # to average out pixel
-for pixels in range(36):
-    # this block is for individual sqaure
-    for pixely in range(startScany, startScanx+pixelSize):
-        for pixelx in range(startScanx, startScanx+pixelSize):
-            currentRow.append([]) # add column to row
-            r, g, b = referenceTag1[pixelx, pixely] # get pixel colour
-            if ((r+g+b)/3) > 128: # pseduo binarize
+
+# for pixels in range(36):
+#     # this block is for individual sqaure
+#     for pixely in range(startScany, startScany+pixelSize):
+#         # for pixelx in range(startScanx, startScanx+pixelSize):
+#         for pixelx in range(pixelSize):
+#             # currentRow.append([]) # add column to row
+#             r, g, b, a = referenceTag1[pixelx, pixely] # get pixel colour
+#             # print((r, g, b, a))
+#             if ((r+g+b)/3) < colourTolerance: # pseduo binarize
+#                 currentRow.insert(pixelx, 1)
+#             else:
+#                 currentRow.insert(pixelx, 0)
+#         currentPixel.append(currentRow) # adds row to individual sqaure
+#         print(currentRow)
+#         currentRow.clear() # clears row for next interation 
+#         startScany += 1
+
+#     startScanx += pixelSize
+
+#     if pixels+1 % 6 == 0 and pixels != 0:
+#         startScany += pixelSize*pixely #jump sqaure in y
+#         startScanx = 0
+
+startScanx = pixelSize*4
+print(startScanx)
+startScany = pixelSize*4
+print(startScany)
+
+# print(referenceTag1[pixelx, pixely][0],)
+
+for pixely in range(startScany, startScany+pixelSize):
+        # for pixelx in range(startScanx, startScanx+pixelSize):
+        for pixelx in range(pixelSize):
+            # currentRow.append([]) # add column to row
+            # r, g, b, a = croppedTag[pixelx, pixely] # get pixel colour
+            r, g, b, a = croppedTag.getpixel((pixelx, pixely)) # get pixel colour
+            print(croppedTag.getpixel((pixelx,pixely))[0])
+            if ((r+g+b)/3) < colourTolerance: # pseduo binarize
                 currentRow.insert(pixelx, 1)
             else:
                 currentRow.insert(pixelx, 0)
         currentPixel.append(currentRow) # adds row to individual sqaure
+        print(currentRow)
         currentRow.clear() # clears row for next interation 
         startScany += 1
-
-    startScanx += pixelSize
-
-    if pixels+1 % 6 == 0 and pixels != 0:
-        startScany += pixelSize*pixely #jump sqaure in y
-        startScanx = 0
-    
