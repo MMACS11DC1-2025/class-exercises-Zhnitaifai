@@ -22,99 +22,138 @@ output report with time in 3 decimal placs (well formatted using string formatti
 '''
 from PIL import Image
 import time
-# tags r 6x6
 
-referenceTag1File = Image.open("6.7/referenceTag1.png")
-referenceTag1 = referenceTag1File.load()
+# gets the user's desired mode
+def inputValidation(input, type):
+    if type == "mode":
+        if str(input[0]).lower() == "s":
+            return "set"
+        elif str(input[0]).lower() == "d":
+            return "detect"
+        else:
+            print("Please enter a valid input")
+            return ""
+    else:
+        try:
+            print(int(input))
+            return int(input)
+        except ValueError:
+            return ""
+            
+while True:
+    mode = input("Toggle mode (set = s, detect = d): ")
+    mode = inputValidation(mode, "mode")
 
-print(referenceTag1File.width)
+    if mode:
+        break
 
-tag16h5 = [
-    [ #ID: 0
-     [1, 1, 1, 1, 1, 1],
-     [1, 1, 1, 0, 1, 1],
-     [1, 1, 1, 0, 0, 1],
-     [1, 1, 1, 1, 0, 1],
-     [1, 0, 1, 0, 0, 1],
-     [1, 1, 1, 1, 1, 1]
-    ]
-] 
+while True:
+    numOfTags = input("Number of tags to scan: ")
+    numOfTags = inputValidation(numOfTags, "tags")
+
+    if numOfTags > 0:
+        break
+
+print(f"Mode: {mode}")
+print(f"Number of Tags: {numOfTags}")
 
 colourTolerance = 70
 
-# might want to make so that can pass in custom image
-pixelDistance = 0
-while True:
-    r, g, b, a = referenceTag1[pixelDistance, pixelDistance]
-    if r >= colourTolerance and g >= colourTolerance and b >= colourTolerance:
-        pixelDistance += 1
+def trim(imageFileIndex):
+    if mode == "set":
+        tagName = f"6.7/referenceTags/tag{imageFileIndex}.png"
     else:
-        break
-# x1, y1, x2, x3
-(left, upper, right, lower) = (pixelDistance, pixelDistance, referenceTag1File.height-pixelDistance, referenceTag1File.width-pixelDistance)
-croppedTag = referenceTag1File.crop((left, upper, right, lower))
-pixelSize = int(croppedTag.width/6)
-print(croppedTag.width)
-print(pixelSize)
-time.sleep(2)
-croppedTag.save('croppedTag.png')
-# if white border is not equal, check 2 corners
-                    
+        tagName = f"6.7/randomizedTags/tag{imageFileIndex}.png"
 
-currentTag = [] # the whole tag
-currentPixel = [] # individual sqaure in tag
+    imageFile = Image.open(tagName)
+    imageLoaded = imageFile.load()
 
-# individual april tag pixels
-# combine binarise into this
+    pixelDistance = 0
+    while True:
+        # r, g, b = imageLoaded[pixelDistance, pixelDistance]
+        r = imageLoaded[pixelDistance, pixelDistance][0]
+        g = imageLoaded[pixelDistance, pixelDistance][1]
+        b = imageLoaded[pixelDistance, pixelDistance][2]
 
-startScanx = 0
-startScany = 0
+        if r >= colourTolerance and g >= colourTolerance and b >= colourTolerance:
+            pixelDistance += 1
+        else:
+            break
+    # syntax: x1, y1, x2, x3
+    (left, upper, right, lower) = (pixelDistance, pixelDistance, imageFile.height-pixelDistance, imageFile.width-pixelDistance)
+    croppedTagFile = imageFile.crop((left, upper, right, lower))
+    croppedTag = imageFile.crop((left, upper, right, lower)).load()
+    pixelSize = int(croppedTagFile.width/6)
+    # croppedTag.save('croppedTag.png')
+    # if white border is not equal, check 2 corners
+    return [croppedTag, pixelSize]          
 
-currentRow = []
-numInPixel = 0 # to average out pixel
+def readTag(imageFileIndex):
+    croppedTag, pixelSize = trim(imageFileIndex)
 
-# for pixels in range(36):
-#     # this block is for individual sqaure
-#     for pixely in range(startScany, startScany+pixelSize):
-#         # for pixelx in range(startScanx, startScanx+pixelSize):
-#         for pixelx in range(pixelSize):
-#             # currentRow.append([]) # add column to row
-#             r, g, b, a = referenceTag1[pixelx, pixely] # get pixel colour
-#             # print((r, g, b, a))
-#             if ((r+g+b)/3) < colourTolerance: # pseduo binarize
-#                 currentRow.insert(pixelx, 1)
-#             else:
-#                 currentRow.insert(pixelx, 0)
-#         currentPixel.append(currentRow) # adds row to individual sqaure
-#         print(currentRow)
-#         currentRow.clear() # clears row for next interation 
-#         startScany += 1
+    currentTag = [] # the whole tag
 
-#     startScanx += pixelSize
+    startScanx = 0
+    startScany = 0
 
-#     if pixels+1 % 6 == 0 and pixels != 0:
-#         startScany += pixelSize*pixely #jump sqaure in y
-#         startScanx = 0
+    for row in range(6): # y direction
+        currentRow = [] # resets row
+        for coloumn in range(6): # x direction
+            # this block is per a cell
+            startScanx = coloumn*pixelSize 
+            startScany = row*pixelSize
 
-startScanx = pixelSize*4
-print(startScanx)
-startScany = pixelSize*4
-print(startScany)
+            # values to average from
+            totalBlack = 0
+            pixelCount = 0 
 
-# print(referenceTag1[pixelx, pixely][0],)
+            for pixely in range(startScany, startScany+pixelSize):  
+                for pixelx in range(startScanx, startScanx+pixelSize):
+                    # r, g, b = croppedTag[pixelx, pixely] # get pixel colour
+                    r = croppedTag[pixelx, pixely][0]
+                    g = croppedTag[pixelx, pixely][1]
+                    b = croppedTag[pixelx, pixely][2]
+                    if ((r+g+b)/3) < colourTolerance: # pseduo binarize
+                        totalBlack += 1
 
-for pixely in range(startScany, startScany+pixelSize):
-        # for pixelx in range(startScanx, startScanx+pixelSize):
-        for pixelx in range(pixelSize):
-            # currentRow.append([]) # add column to row
-            # r, g, b, a = croppedTag[pixelx, pixely] # get pixel colour
-            r, g, b, a = croppedTag.getpixel((pixelx, pixely)) # get pixel colour
-            print(croppedTag.getpixel((pixelx,pixely))[0])
-            if ((r+g+b)/3) < colourTolerance: # pseduo binarize
-                currentRow.insert(pixelx, 1)
+                    pixelCount += 1
+
+            if totalBlack/pixelCount > 0.5:
+                currentRow.append(1)
             else:
-                currentRow.insert(pixelx, 0)
-        currentPixel.append(currentRow) # adds row to individual sqaure
-        print(currentRow)
-        currentRow.clear() # clears row for next interation 
-        startScany += 1
+                currentRow.append(0)
+        currentTag.append(currentRow)
+
+    # # debugging print
+    # for i in range(6):
+    #     print(currentTag[i])
+
+    return currentTag
+
+# main loop
+keyOfTags = {}
+
+if mode == "set":
+    for tags in range(numOfTags):
+        currentTag = readTag(tags)
+        print(f"Tag {tags}: ")
+        for i in range(6):
+            print(currentTag[i])
+        id = input(f"Set id of Tag {tags} to: ")
+        print(id)
+        keyOfTags[id] = currentTag
+        print(keyOfTags)
+    for y in range(len(keyOfTags)):
+        for x in range(6):
+            print(keyOfTags[str(y)][x])
+        print("\n")
+
+mode = "detect"
+tagIDs = []
+for tags in range(numOfTags):
+    currentTag = readTag(tags)
+    if currentTag == keyOfTags[str(tags)]:
+        # if currentTag == keyOfTags[tags]:
+        id = tags
+    tagIDs.append(id)
+print(tagIDs)
