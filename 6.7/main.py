@@ -62,8 +62,10 @@ colourTolerance = 70
 def trim(imageFileIndex):
     if mode == "set":
         tagName = f"6.7/referenceTags/tag{imageFileIndex}.png"
+        print(tagName)
     else:
         tagName = f"6.7/randomizedTags/tag{imageFileIndex}.png"
+        print(tagName)
 
     imageFile = Image.open(tagName)
     imageLoaded = imageFile.load()
@@ -140,9 +142,8 @@ if mode == "set":
         for i in range(6):
             print(currentTag[i])
         id = input(f"Set id of Tag {tags} to: ")
-        print(id)
         keyOfTags[id] = currentTag
-        print(keyOfTags)
+    # debugging
     for y in range(len(keyOfTags)):
         for x in range(6):
             print(keyOfTags[str(y)][x])
@@ -152,8 +153,24 @@ mode = "detect"
 tagIDs = []
 for tags in range(numOfTags):
     currentTag = readTag(tags)
-    if currentTag == keyOfTags[str(tags)]:
-        # if currentTag == keyOfTags[tags]:
-        id = tags
+    for keys in range(len(keyOfTags)):
+        if currentTag == keyOfTags[str(keys)]:
+            # if currentTag == keyOfTags[tags]:
+            id = keys
     tagIDs.append(id)
 print(tagIDs)
+
+# selection sort
+for ids in range(len(tagIDs)-1):
+    minimum = tagIDs[ids]
+    print(tagIDs[ids])
+    for each in tagIDs:
+        if each < minimum:
+            minimum = each
+    print(minimum)
+    tagIDs[ids], minimum = minimum, tagIDs[ids]
+    print(tagIDs)
+
+# binary sort
+
+# report
