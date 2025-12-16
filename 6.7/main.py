@@ -51,7 +51,7 @@ while True:
     numOfTags = input("Number of tags to scan: ")
     numOfTags = inputValidation(numOfTags, "tags")
 
-    if numOfTags > 0:
+    if numOfTags and int(numOfTags) > 0:
         break
 
 print(f"Mode: {mode}")
@@ -141,8 +141,7 @@ if mode == "set":
         print(f"Tag {tags}: ")
         for i in range(6):
             print(currentTag[i])
-        id = input(f"Set id of Tag {tags} to: ")
-        keyOfTags[id] = currentTag
+        keyOfTags[str(tags)] = currentTag
     # debugging
     for y in range(len(keyOfTags)):
         for x in range(6):
@@ -162,14 +161,22 @@ print(tagIDs)
 
 # selection sort
 for ids in range(len(tagIDs)-1):
-    minimum = tagIDs[ids]
-    print(tagIDs[ids])
-    for each in tagIDs:
-        if each < minimum:
-            minimum = each
-    print(minimum)
-    tagIDs[ids], minimum = minimum, tagIDs[ids]
+    minimumIndex = ids
+    print(f"minimumIndex: {minimumIndex}")
+    minimumValue = tagIDs[ids]
+    print(f"minimumValue: {minimumValue}")
+    for each in range(len(tagIDs[ids:])):
+        if tagIDs[each] < minimumValue:
+            minimumIndex = each
+    print(f"minimumIndex: {minimumIndex}")
+    print(f"tagids[ids]: {tagIDs[ids]}")
+    tagIDs[ids], tagIDs[minimumIndex] = tagIDs[minimumIndex], tagIDs[ids]
     print(tagIDs)
+
+# for ids in range(len(tagIDs)-1):
+#     minimumIndex = tagIDs[ids]
+#     for each in range(tagIDs[ids+1:]):
+         
 
 # binary sort
 
