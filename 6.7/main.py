@@ -59,13 +59,11 @@ print(f"Number of Tags: {numOfTags}")
 
 colourTolerance = 70
 
-def trim(imageFileIndex):
+def trim(imageFileIndex, mode):
     if mode == "set":
         tagName = f"6.7/referenceTags/tag{imageFileIndex}.png"
-        print(tagName)
     else:
         tagName = f"6.7/randomizedTags/tag{imageFileIndex}.png"
-        print(tagName)
 
     imageFile = Image.open(tagName)
     imageLoaded = imageFile.load()
@@ -88,10 +86,10 @@ def trim(imageFileIndex):
     pixelSize = int(croppedTagFile.width/6)
     # croppedTag.save('croppedTag.png')
     # if white border is not equal, check 2 corners
-    return [croppedTag, pixelSize]          
+    return [croppedTag, pixelSize, tagName]          
 
-def readTag(imageFileIndex):
-    croppedTag, pixelSize = trim(imageFileIndex)
+def readTag(imageFileIndex, mode):
+    croppedTag, pixelSize, fileName = trim(imageFileIndex, mode)
 
     currentTag = [] # the whole tag
 
@@ -130,54 +128,37 @@ def readTag(imageFileIndex):
     # for i in range(6):
     #     print(currentTag[i])
 
-    return currentTag
+    return [currentTag, fileName]
 
-# main loop
 keyOfTags = {}
 
-if mode == "set":
-    for tags in range(numOfTags):
-        currentTag = readTag(tags)
-        print(f"Tag {tags}: ")
-        for i in range(6):
-            print(currentTag[i])
-        keyOfTags[str(tags)] = currentTag
-    # debugging
-    for y in range(len(keyOfTags)):
-        for x in range(6):
-            print(keyOfTags[str(y)][x])
-        print("\n")
+# sets the tag ids
+for tags in range(numOfTags):
+    currentTag = readTag(tags, "set")
+    keyOfTags[str(tags)] = currentTag
 
-mode = "detect"
+# add ids from "detect" mode to list of tagIDs
 tagIDs = []
 for tags in range(numOfTags):
-    currentTag = readTag(tags)
+    currentTag, fileName = readTag(tags, "detect")
     for keys in range(len(keyOfTags)):
         if currentTag == keyOfTags[str(keys)]:
             # if currentTag == keyOfTags[tags]:
             id = keys
-    tagIDs.append(id)
-print(tagIDs)
+    tagIDs.append([id, fileName])
 
 # selection sort
 for ids in range(len(tagIDs)-1):
     minimumIndex = ids
-    print(f"minimumIndex: {minimumIndex}")
-    minimumValue = tagIDs[ids]
-    print(f"minimumValue: {minimumValue}")
     for each in range(len(tagIDs[ids:])):
-        if tagIDs[each] < minimumValue:
-            minimumIndex = each
-    print(f"minimumIndex: {minimumIndex}")
-    print(f"tagids[ids]: {tagIDs[ids]}")
+        if tagIDs[each+ids] < tagIDs[minimumIndex]:
+            minimumIndex = each+ids
     tagIDs[ids], tagIDs[minimumIndex] = tagIDs[minimumIndex], tagIDs[ids]
-    print(tagIDs)
 
-# for ids in range(len(tagIDs)-1):
-#     minimumIndex = tagIDs[ids]
-#     for each in range(tagIDs[ids+1:]):
-         
-
-# binary sort
-
+# binary search
+if mode == "select":
+    print()
+else:
+    for i in range():
+        print(f"")
 # report
