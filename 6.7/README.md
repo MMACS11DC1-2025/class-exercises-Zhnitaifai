@@ -1,81 +1,202 @@
-# Project: Image Explorer Checklist Rubric
+# Detecting and Indentifying April Tags
+> The goal of this project is to accurately detect fudicial markers similar to QR codes called type Tag16h5 AprilTags. These AprilTags are a 6x6 gride of black and white sqaures/pixels, usually with a white border.  
 
-TOTAL: ___ / 100
+AprilTags are widely used in the real world in robotics and computer vision. Each tag has a specific ID that can be used to aid:
+- Robot localization
+- Camera Calibration
+- Object Tracking
+- Environment indentification
 
-## Project Description
+This progam indentifies the IDs of from images of an april tags and outputs a list of every image's corresponding ID (view mode). If a specific id is desired for a certain image, the user can simply input a file name to recieve its ID (select mode).
+<img src = "READMEimages\READMEimage3.png"><br>
+# The Algorithm
+## Understanding Tag16h5 AprilTags
+> Tag16h5 AprilTags are the simplest of all the April tags with 36 pixels and 30 total IDs. Tag16h5 was chosen due to its larger squares which helps with the accuracy of the program. If desired, the program can be easily modified to accomodate for different tag types. Each tag always has a white border with a border of black sqaures on the tag.
 
-**Goal:** Create a Python program that analyzes a set of at least 10 images based around a theme of your choice (e.g., medical scans, satellite photos, historical archives, deep-sea research photos).
-Using the new skills in units 5 and 6, you will implement a computer vision algorithm that detects a visual feature.
+<img src = "referenceTags\tag0.png"><br>
+## 0. **Main functions**
+- `trim(imageFileIndex, mode)`
+    - `trim()` takes an image and removes the white border. This provides a clean tag to slice into a grid
+    - `imageFileIndex`: Determines which image is taken; `tag_.png`
+    - `mode`: determines which folder the image is taken from. If `"set"` mode is selected, images are taken from the `referenceTags` folder. Any other mode will take images from the `randomizedTags` folder. <br>
 
-## "Gotta Have" Checklist
+    1. Constructs the image file name for loading
+    2. Opens and loads image
+    3. Until main tag is found, goes through the tag diagonally to cover the borders in the x and y direction. The active pixel is checked for its colour. If its black the loops stops
+    4. Amount of time the loops runs determines the border's thickness in pixels
+    5. Based thickness, coordinates are drawn to use `.crop()` function
+    6. Image is cropped and saved to a copy
+    7. Since given a clean image, the size of the pixels of the April tag can be easily determined by the number of pixels, 6, of a Tag16h5 AprilTag
+    8. Returns a list with:
+        - 2d array of cropped tag
+        - The size of the pixels/sqaures
+        - File name
 
-## **ESSENTIAL REQUIREMENTS**
-### Project Overview - Must appear in a README.md file
+- `readTag(imageFileIndex, mode)`
+    - `readTag()` scans the tag to determine its ID
+    - `imageFileIndex` and `mode` parameters work the same way as in `trim()`
+    1. Extracts `croppedTag`, `pixelSize`, and `fileName` from `trim()`
+    2. `startScanx` and `startScany` are initialized to be used to for coordinates to start scanning each pixel/square
+    3. For 6x6 grid of pixels, a row based on `pixelSize` is binarized, scanned, and averaged out.
+    4. Average is added to the `currentTag` 2d array; 1 = black pixel, 0 = white pixel
+    5. Return a list with:
+        - 2d array of scanned tag (in 1s and 0s)
+        - File name
+___
+## 1. Input and Validation
+### Mode Selection
+- `"select"`: Selects a certain image and outputs only that ID. Useful for large datasets instead of searching manually
+<img src = "READMEimages\READMEimage0.png"><br>
+- `"view"`: View all the images' IDs
 
-> *These items belong at the very top of your `README.md`. They give the context for everything else you do.*
+    <img src = "READMEimages\READMEimage1.png"><br>
+- Loops contiuously until a "v" = view mode or "s" for select mode is inputted
 
-- [ ] Choose a specific theme for which you will be scanning multiple images (3 pts)
-- [ ] Clearly define the visual feature your program will detect and count (2 pts)
-- [ ] Justify your feature detection with an explanation of how your chosen feature can be accurately identified (3 pts)
+```
+while True:
+    outputMode = input("Toggle mode (select = s, view = v): ")
+    outputMode = inputValidation(outputMode, "mode")
+    if outputMode:
+        break
+```
+    
+### Number of tags to scan
+- The example folders `randomizedTags` and `referenceTags` each contain 10 tags
+- Loops continously until integar is inputted.
 
-### Image Processing and Feature Extraction (Unit 5)
-#### Task 1: Pixels to Data Function
-- [ ] Write a function, is_target_feature, that accepts pixel data (e.g. colour channels as RGB tuple inputs) and returns a specific, useful output (e.g., returns True if the pixel matches your custom feature definition else False, or a weight) (10 pts)
-#### Task 2: Pixel Iteration and List Building
-- [ ] Use nested loops to iterate over all pixels **in a set of at least 10 images** and calculate your "Feature Density Score" for each image (10 pts)
-- [ ] Append the filename and score to a master list, demonstrating list manipulation and the use of the append() method (5 pts)
-#### Task 3: Code Profiling
-- [ ] Measure the precise time taken for the program to complete the pixel processing loops using the time module (3 pts)
-- [ ] Output this time in a human-readable report, using string formatting to ensure the output displays accurately to three decimal places (2 pts)
+```
+while True:
+    outputNumOfTags = input("Number of tags to scan: ")
+    outputNumOfTags = inputValidation(outputNumOfTags, "tags")
+    if outputNumOfTags and int(outputNumOfTags) > 0:
+        break
+```
+___
+## 2. Stores reference tags to match IDs
+```
+keyOfTags = {} 
+for tags in range(10):
+    currentTag = readTag(tags, "set")[0]
+    keyOfTags[str(tags)] = currentTag
+```
+1. Creates a dictionary to store the ordered reference tags. These are later used for matching the tags
+2. For the every reference tag in the folder, `readTag()` is called to get the tag's pattern
+3. Only the pattern (2d array) is stored (no file name)
+4. Tags are indexed by their position. Since they are taken from the `referenceTags` folder, they are already sorted by ID
+___
+## 3. Detect and Match Tags
+```
+tagIDs = []
+for tags in range(outputNumOfTags):
+    currentTag, fileName = readTag(tags, "detect")
+    id = -1
+    for keys in range(len(keyOfTags)):
+        if currentTag == keyOfTags[str(keys)]:
+            id = keys
+    tagIDs.append([id, fileName])
+```
+1. Reads each tag from the `randomizedTags` folder
+2. Compares the detected pattern with all patterns stored in `keyOfTags`
+3. When a match is found, the corresponding ID is assigned
+4. If no match is found, ID remains `-1`
+5. List containing id and file name is added to `tagIDs`
+___
+## 4. Sort by File name
+```
+for ids in range(len(tagIDs)-1):
+    minimumIndex = ids
+    for each in range(len(tagIDs[ids:])):
+        if tagIDs[each+ids][1] < tagIDs[minimumIndex][1]:
+            minimumIndex = each+ids
+    tagIDs[ids], tagIDs[minimumIndex] = tagIDs[minimumIndex], tagIDs[ids]
+```
+1. Selections sort is used to sort tags by filename
+    - Sorting by file name allows for binary search in  `"select"` mode
+2. Strings are compared alphabetically
+    - Since all name are the same except for 1 number, they can be sorted like integars
+<br>
+> Time Complexity: O(n²)
+___
+## 5.  Select Mode - Binary Search
+```
+if outputMode == "select":
+    timeStart = time.time()
+    desiredFile = f"6.7/randomizedTags/{input("Enter the desired file for identification: ")}.png"
+    # standard binary search
+    low = 0
+    high  = len(tagIDs)-1
+    fileFound = False
+    index = -1
 
-### Algorithms and Efficiency (Unit 6)
-#### Task 4: Selection Sort
-- [ ] Implement the Selection Sort algorithm function yourself (not using built-in libraries for sorting) to sort the master list based on the calculated Feature Density Score (highest to lowest) (12 pts)
-- [ ] Output the top 5 results using list slicing (3 pts)
-#### Task 5: Binary Search
-- [ ] Implement the Binary Search algorithm function yourself to search the sorted list for a specific target score (10 pts)
+    while low <= high:
+        mid = int((low+high)/2)
 
-### Process
-- [ ] Algorithm design in English: outline the logic using English comments (pseudocode) before each major Python code block (3 pts)
-- [ ] Code clarity: use descriptive variable names unless they are standard loop indices (e.g. x, y) (2 pts)
-- [ ] Use of functions: structure the program using functions to organize it and reduce code duplication (2 pts)
-- [ ] Testing and robustness: include a section in your README describing testing done to ensure each of the tasks works as intended (1 pt)
-- [ ] Performance analysis: include a section in your README describing your code profiling: give an example of the report and discuss what parts of the program take the longest
-- [ ] Challenges faced: include a section in your README describing at least one challenge faced and how you overcame it (2 pts)
+        if tagIDs[mid][1] == desiredFile:
+            index = mid
+            fileFound = True # used for missing file error detection
+            break
+        elif tagIDs[mid][1] < desiredFile:
+            low = mid+1
+        else:
+            high = mid-1
+```
+1. User inputs desired file name (e.g. "tag5")
+2. Creates full path by adding folder and extension names
+3. Preforms binary search on `tagIDs` list
+4. Error handling: If file name is not found, displays avaiable files
+> Time Complexity: O(log n)
 
-### Version Control
-- [ ] Source code is committed to repository on Github with at least 5 meaningful commits on different days prior to deadline (10 pts)
+## 6. View Mode - Displays all results
+```
+else:
+    # outputs every file name with its corresponding ID
+    for i in range(len(tagIDs)):
+        print(f"Tag {tagIDs[i][1][22]}: ID {tagIDs[i][0]}")
+```
+1. Iterates through all detected tags
+2. Get clean tag name from full path
+3. Outputs formatted list showing each tag with its corresponding ID
 
-## **QUALITY CRITERIA**
-### Code Quality and Efficiency
-- [ ] Code quality: Clean, readable structure (2 pts)
-- [ ] Efficiency: Evidence of thinking about algorithmic complexity throughout the code (2 pts)
-- [ ] The program handles potential errors and edge cases effectively (2 pts)
-- [ ] Documentation polish: README is clear, concise, free of typos; also, code comments explain why decisions were made. (1 pt)
+# Test Cases
+1. Exact match test
+    - 10 reference tags, 10 randomized tags
+    - **Result**: All tags are identified correctly
 
-### Creativity and Originality
-- [ ] The chosen theme and visual feature are unique, interesting, and insightful (2 pts)
-- [ ] Feature detection uses a more advanced process, such as pre-processing the image, using multiple pixels, or using statistical approaches to detect features (4 points)
-- [ ] Captured feature involves a real-world use-case. References a real paper, report, or dataset supporting decisions for detecting feature (4 points)
+2. Less randomized tags
+    - 10 reference tags, <10 randomized tags
+    - **Result**: All randomized tags are identified correctly with all 10 reference tags
 
-## **SUBMISSION REQUIREMENTS**
+3. More randomized tags
+    - <10 reference tag, 10 randomized tags 
+    - **Result**: All tags are scanned without errors. If a corresponding reference tag is excluded, outputs `ID NOT FOUND`
 
-### **Files to Include:**
-1. `main.py` - Your complete Python program
-1. `README.md` - Documentation file with all required content.
-1. Images - The set of at least 10 images that your program will analyze
-1. (Optional): - Other Python modules you write that you import for use in `main.py`
+2. Fuzzy/Partially hidden pixels
+    - Tags are fuzzy, low resolution, or missing some pixels
+    - **Result:** Binarization with 50% threshold with additional averaging allows for accurate detection
 
-### **Required Documentation Content Summary:**
-- Project overview, including your chosen image theme
-- Explanation of your visual feature and how it will be identified
-- Discussion of the testing and validation done to verify your program works as intended
-- Discussion of your code profiling
-- Discussion of challenges faced while working on this project
+# Code profiling
+- The program is profiled on time after every major step of the algorithm:
+    - Storing reference tags
+    - Detecting tags' ID
+    - Sorts tags
+    - (If `"select"` mode is chosen) Searching time
+- Before: `timeStart` is set to `time.time()`
+- After: `timeEnd` is set to `time.time()`
+- time taken is added to `timesTaken` dictionary
+### Time report
+<img src = "READMEimages\READMEimage2
+.png"><br>
+- Before final output, formatted time report is given
+- Includes:
+    - Time taken for every major step
+    - Total processing time
+    - Average time per randomized tag
 
-## **GETTING STARTED TIPS**
+# Challenges
+1. Image border disrupted sqaure size calculations
+    - **Problem:** White border around tag meant that tag could not be accurately split into sqaure
+    - **Solution:** Created a new function, `trim()`, which incrementally crops border of image until hits black (the tag)
 
-1. Start simple - work on one sub-problem at a time
-1. Test incrementally - "unit test" each function you write separately to make sure it works
-1. Start with pseudocode - describe your algorithm in English before starting to code
-1. Use the "gotta have" checklist - self-grade to make sure your submission fulfills all requirements
+2. Sorted wrong values
+    - **Problem:** Selection sort sorted by ID while binary search needed to compare file names
+    - **Solution:** Changed `keyOfTags` from a list to a dictionary (key: file name, value: ID)

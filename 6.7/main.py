@@ -3,6 +3,7 @@ import time
 
 # gets the user's desired mode
 def inputValidation(input, type):
+    # this section is for the output mode validation
     if type == "mode":
         if str(input[0]).lower() == "s":
             return "select"
@@ -11,7 +12,8 @@ def inputValidation(input, type):
         else:
             print("Please enter a valid input")
             return ""
-    else:   
+    else:
+        # this section is for the number of output tags validation
         try:
             return int(input)
         except ValueError:
@@ -34,7 +36,7 @@ while True:
 print(f"Mode: {outputMode}")
 print(f"Number of Tags: {outputNumOfTags}")
 
-colourTolerance = 70 # colour tolerance of black
+colourTolerance = 70 # colour tolerance for black in AprilTags
 
 def trim(imageFileIndex, mode):
     if mode == "set":
@@ -42,10 +44,12 @@ def trim(imageFileIndex, mode):
     else:
         tagName = f"6.7/randomizedTags/tag{imageFileIndex}.png" # for ID detection
 
+    # get files
     imageFile = Image.open(tagName)
     imageLoaded = imageFile.load()
 
     pixelDistance = 0
+
     while True:
         # r, g, b = imageLoaded[pixelDistance, pixelDistance]
         r = imageLoaded[pixelDistance, pixelDistance][0]
@@ -71,6 +75,7 @@ def readTag(imageFileIndex, mode):
 
     currentTag = [] # the whole tag
 
+    # initialize scanning variables
     startScanx = 0
     startScany = 0
 
@@ -84,6 +89,7 @@ def readTag(imageFileIndex, mode):
             totalBlackPixels = 0
             pixelCount = 0 
 
+            # for every pixel
             for pixely in range(startScany, startScany+pixelSize):  
                 for pixelx in range(startScanx, startScanx+pixelSize):
                     # gets pixel colours
@@ -108,9 +114,9 @@ timesTaken = {}
 # Stores reference tags
 print("Storing reference tags...")
 timeStart = time.time()
-keyOfTags = {} # stoarge for reference tags
-for tags in range(outputNumOfTags):
-    currentTag, fileName = readTag(tags, "set")
+keyOfTags = {} # storage for reference tags
+for tags in range(10): # number of reference tags
+    currentTag = readTag(tags, "set")[0]
     keyOfTags[str(tags)] = currentTag
 timeEnd = time.time()
 timesTaken["storing"] = timeEnd - timeStart # records time taken by storing reference tags
@@ -141,22 +147,27 @@ for ids in range(len(tagIDs)-1):
 timeEnd = time.time()
 timesTaken['sorting'] = timeEnd - timeStart # records time taken by selection sort
 
-# total time for use in performance report
-totalTime = sum(timesTaken.values())
+def timeReport(mode):
+    # total time for use in performance report
+    totalTime = sum(timesTaken.values())
 
-# preformance report
-print("=" * 60)
-print(f"Storing references:    {timesTaken['storing']:.5f} seconds")
-print(f"Detecting tags:        {timesTaken['detection']:.5f} seconds")
-print(f"Sorting results:       {timesTaken['sorting']:.5f} seconds")
-print(f"{'-' * 60}")
-print(f"Total processing time: {totalTime:.5f} seconds")
-print(f"Average per tag:       {totalTime/outputNumOfTags:.5f} seconds")
-print("=" * 60)
+    # preformance report
+    print("=" * 60)
+    print(f"Storing references:    {timesTaken['storing']:.5f} seconds")
+    print(f"Detecting tags:        {timesTaken['detection']:.5f} seconds")
+    print(f"Sorting IDs:           {timesTaken['sorting']:.5f} seconds")
+    if mode == "select":
+        print(f"Searching IDs:         {timesTaken['searching']:.5f} seconds")
+    print(f"{'-' * 60}")
+    print(f"Total processing time: {totalTime:.5f} seconds")
+    print(f"Average per tag:       {totalTime/outputNumOfTags:.5f} seconds")
+    print("=" * 60)
 
 # binary search
 if outputMode == "select":
+    timeStart = time.time()
     desiredFile = f"6.7/randomizedTags/{input("Enter the desired file for identification: ")}.png"
+    # standard binary search
     low = 0
     high  = len(tagIDs)-1
     fileFound = False
@@ -167,22 +178,32 @@ if outputMode == "select":
 
         if tagIDs[mid][1] == desiredFile:
             index = mid
-            fileFound = True
+            fileFound = True # used for missing file error detection
             break
         elif tagIDs[mid][1] < desiredFile:
             low = mid+1
         else:
             high = mid-1
     
+    timeEnd = time.time()
+    timesTaken['searching'] = timeEnd - timeStart # records time taken by binary search
+    timeReport("select")
+
+    # error handling if file not found
     if fileFound:
         desiredFileIndex = tagIDs[index][0]
-        print(f"Sucess! File Found: {desiredFile}")
+        print(f"Success! File Found: {desiredFile}")
         print(f"Tag ID: {desiredFileIndex}")
     else:
         print(f"File retrieval of {desiredFile} failed.")
         print("Please choose another available file: ")
         for tags in tagIDs:
-            print(f"- {tags[1]}")
+            print(f"- tag{tags[1][22]}")
 else:
+    timeReport("view")
+    # outputs every file name with its corresponding ID
     for i in range(len(tagIDs)):
-        print(f"Tag {tagIDs[i][1][22]}: ID {tagIDs[i][0]}")
+        if tagIDs[i][0] == -1:
+            print(f"Tag {tagIDs[i][1][22]}: ID NOT FOUND")
+        else:
+            print(f"Tag {tagIDs[i][1][22]}: ID {tagIDs[i][0]}")
